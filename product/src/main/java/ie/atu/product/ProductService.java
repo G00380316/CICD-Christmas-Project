@@ -1,5 +1,7 @@
 package ie.atu.product;
 
+import static org.springframework.beans.BeanUtils.*;
+
 import org.springframework.stereotype.Service;
 
 import ie.atu.product.exception.ProductServiceException;
@@ -7,8 +9,6 @@ import ie.atu.product.payload.ProductRequest;
 import ie.atu.product.payload.ProductResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-
-import static org.springframework.beans.BeanUtils.copyProperties;
 
 @Service
 @RequiredArgsConstructor
@@ -62,7 +62,7 @@ public class ProductService {
         productRepo.save(product);
         log.info("Product Quantity updated Successfully");
     }
-    
+
     public void deleteProductById(long productId) {
         log.info("Product ID seletected for deletion: {}", productId);
 
@@ -70,7 +70,8 @@ public class ProductService {
             log.info("Doesn't look ID exists still checking {}", !productRepo.existsById(productId));
             throw new ProductServiceException("Product with given ID" + productId + "not found:", "PRODUCT_NOT_FOUND");
         }
+
+        log.info("Product with ID: {}" + productId + " is deleted");
+        productRepo.deleteById(productId);
     }
 }
-
-

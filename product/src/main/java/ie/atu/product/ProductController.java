@@ -31,7 +31,6 @@ public class ProductController {
 
     @PostMapping("")
     public ResponseEntity<Long> addProduct(@RequestBody ProductRequest productRequest) {
-        //TODO: process POST request
         log.info("Controller method Called to Add Product");
         log.info("Product Request: " + productRequest.toString());
 
@@ -41,7 +40,6 @@ public class ProductController {
     
     @GetMapping("/{id}")
     public ResponseEntity<ProductResponse> getProductByID(@PathVariable("id") long productID) {
-        //TODO: process GET request
         log.info("Controller method Called to get Product by ID");
         log.info("Product ID: " + productID);
 
@@ -56,7 +54,6 @@ public class ProductController {
 
     @PutMapping("reduceQuantity/{id}")
     public ResponseEntity<Void> reduceQuantity(@PathVariable("id") long productID, @RequestParam long quantity) {
-        //TODO: process PUT request
         log.info("Controller method Called to reduce quantity");
         log.info("Controller method Called to reduce quantity of this product ID:" + productID + "by" + quantity);
         log.info("Product ID: " + productID);
