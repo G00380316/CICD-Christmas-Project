@@ -1,4 +1,4 @@
-package ie.atu.order.payload;
+package ie.atu.order.payload.payment;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

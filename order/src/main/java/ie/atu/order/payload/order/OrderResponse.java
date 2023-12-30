@@ -1,7 +1,8 @@
-package ie.atu.order.payload;
+package ie.atu.order.payload.order;
 
 import java.time.Instant;
 
+import ie.atu.order.payload.payment.PaymentType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,6 +21,10 @@ public class OrderResponse {
     private String referenceNumber;
 
     private PaymentType paymentType;
+
+    private String orderStatus;
+
+    private Instant orderDate;
 
     @Data
     @Builder
@@ -42,7 +47,7 @@ public class OrderResponse {
     @NoArgsConstructor
     public static class PaymentDetails {
 
-        private long productID;
+        private long paymentID;
 
         private PaymentType paymentType;
 
