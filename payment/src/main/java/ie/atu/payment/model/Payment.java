@@ -1,4 +1,4 @@
-package ie.atu.payment;
+package ie.atu.payment.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

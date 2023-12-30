@@ -1,4 +1,4 @@
-package ie.atu.payment;
+package ie.atu.payment.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import ie.atu.payment.payload.PaymentRequest;
 import ie.atu.payment.payload.PaymentResponse;
+import ie.atu.payment.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 

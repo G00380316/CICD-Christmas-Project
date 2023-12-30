@@ -1,10 +1,12 @@
-package ie.atu.payment;
+package ie.atu.payment.service;
 
 import java.time.Instant;
 
 import org.springframework.stereotype.Service;
 
+import ie.atu.payment.db.PaymentRepo;
 import ie.atu.payment.exception.PaymentServiceException;
+import ie.atu.payment.model.Payment;
 import ie.atu.payment.payload.PaymentRequest;
 import ie.atu.payment.payload.PaymentResponse;
 import ie.atu.payment.payload.PaymentType;
