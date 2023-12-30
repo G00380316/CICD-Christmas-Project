@@ -65,7 +65,7 @@ public class OrderService {
         return order.getId();
 }
 
-    public OrderResponse getOrderDetails(long orderId) {
+        public OrderResponse getOrderDetails(long orderId) {
         log.info("Getting order details for Order Id : {}", orderId);
 
         Order order = orderRepo.findById(orderId)
@@ -75,14 +75,15 @@ public class OrderService {
         log.info("Talking to the Product service to fetch the product for id: {}", order.getProductID());
 
         ProductResponse productResponse = restTemplate.getForObject(
-                "http://PRODUCT-SERVICE/product/" + order.getProductID(),
+                "http://localhost:8081/product/" + order.getProductID(),
                 ProductResponse.class
         );
+        
 
         log.info("Getting payment information from the payment Service");
 
         PaymentResponse paymentResponse = restTemplate.getForObject(
-                "http://PAYMENT-SERVICE/payment/order/" + order.getId(),
+                "http://localhost:8082/payment/order/" + order.getId(),
                 PaymentResponse.class
         );
 
