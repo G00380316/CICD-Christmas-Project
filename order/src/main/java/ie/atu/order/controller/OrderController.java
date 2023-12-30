@@ -1,4 +1,4 @@
-package ie.atu.order;
+package ie.atu.order.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import ie.atu.order.payload.order.OrderRequest;
 import ie.atu.order.payload.order.OrderResponse;
+import ie.atu.order.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 

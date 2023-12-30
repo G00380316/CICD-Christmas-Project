@@ -1,4 +1,4 @@
-package ie.atu.order;
+package ie.atu.order.model;
 
 import java.time.Instant;
 

@@ -1,4 +1,4 @@
-package ie.atu.order;
+package ie.atu.order.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -10,7 +10,9 @@ import ie.atu.order.payload.order.OrderResponse;
 import ie.atu.order.payload.payment.PaymentRequest;
 import ie.atu.order.payload.payment.PaymentResponse;
 import ie.atu.order.payload.product.ProductResponse;
+import ie.atu.order.db.OrderRepo;
 import ie.atu.order.exception.*;
+import ie.atu.order.model.Order;
 
 import java.time.Instant;
 
