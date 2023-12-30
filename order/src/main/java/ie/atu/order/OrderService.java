@@ -1,6 +1,5 @@
 package ie.atu.order;
 
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
@@ -20,10 +19,10 @@ import java.time.Instant;
 @RequiredArgsConstructor
 public class OrderService {
 
-    private final OrderRepo orderRepo;
-    private final RestTemplate restTemplate;
+        private final OrderRepo orderRepo;
+        private final RestTemplate restTemplate;
 
-    public long placeOrder(OrderRequest orderRequest) {
+        public long placeOrder(OrderRequest orderRequest) {
 
         log.info("Placing Order method is called");
         log.info("Placing Order Request: " + orderRequest.toString());
@@ -51,11 +50,11 @@ public class OrderService {
         String orderStatus = null;
 
         try {
-            log.info("Payment done Successfully. Changing the Order status to PLACED");
-            orderStatus = "PLACED";
+        log.info("Payment done Successfully. Changing the Order status to PLACED" + paymentRequest);
+        orderStatus = "PLACED";
         } catch (Exception e) {
-            log.error("Changing order status to PAYMENT_FAILED");
-            orderStatus = "PAYMENT_FAILED";
+        log.error("Changing order status to PAYMENT_FAILED");
+        orderStatus = "PAYMENT_FAILED";
         }
 
         order.setOrderStatus(orderStatus);
@@ -64,7 +63,7 @@ public class OrderService {
         log.info("Order Placed successfully with Order Id: {}", order.getId());
 
         return order.getId();
-    }
+}
 
     public OrderResponse getOrderDetails(long orderId) {
         log.info("Getting order details for Order Id : {}", orderId);
@@ -113,5 +112,5 @@ public class OrderService {
         log.info("orderResponse : " + orderResponse.toString());
 
         return orderResponse;
-    }
+        }
 }

@@ -26,6 +26,10 @@ public class OrderResponse {
 
     private Instant orderDate;
 
+    private ProductDetails productDetails;
+
+    private PaymentDetails paymentDetails;
+
     @Data
     @Builder
     @AllArgsConstructor
