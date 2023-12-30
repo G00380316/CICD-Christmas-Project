@@ -1,4 +1,4 @@
-package ie.atu.product;
+package ie.atu.product.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

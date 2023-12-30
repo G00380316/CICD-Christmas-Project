@@ -1,10 +1,11 @@
-package ie.atu.product;
+package ie.atu.product.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import ie.atu.product.payload.ProductRequest;
 import ie.atu.product.payload.ProductResponse;
+import ie.atu.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 

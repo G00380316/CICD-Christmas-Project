@@ -1,10 +1,12 @@
-package ie.atu.product;
+package ie.atu.product.service;
 
 import static org.springframework.beans.BeanUtils.*;
 
 import org.springframework.stereotype.Service;
 
+import ie.atu.product.db.ProductRepo;
 import ie.atu.product.exception.ProductServiceException;
+import ie.atu.product.model.Product;
 import ie.atu.product.payload.ProductRequest;
 import ie.atu.product.payload.ProductResponse;
 import lombok.RequiredArgsConstructor;
