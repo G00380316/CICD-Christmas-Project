@@ -35,8 +35,19 @@ public class ProductController {
         log.info("Controller method Called to Add Product");
         log.info("Product Request: " + productRequest.toString());
 
-        long productID = productService.addProduct(productRequest);
-        return new ResponseEntity<>(productID, HttpStatus.CREATED);
+
+        if (productRequest.getName() != null && productRequest.getPrice() != 0
+                && productRequest.getQuantity() != 0
+                && productRequest.getPrice() > 0 && productRequest.getQuantity() > 0) {
+            try {
+                long productID = productService.addProduct(productRequest);
+                return new ResponseEntity<>(productID, HttpStatus.CREATED);
+            } catch (Exception e) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+        } else {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
     
     @GetMapping("/{id}")
@@ -45,7 +56,12 @@ public class ProductController {
         log.info("Product ID: " + productID);
 
         ProductResponse productResponse = productService.getProductbyId(productID);
-        return new ResponseEntity<>(productResponse, HttpStatus.OK);
+
+        if (productResponse != null) {
+            return new ResponseEntity<>(productResponse, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -58,6 +74,11 @@ public class ProductController {
         log.info("Controller method Called to reduce quantity");
         log.info("Controller method Called to reduce quantity of this product ID:" + productID + "by" + quantity);
         log.info("Product ID: " + productID);
+
+        if (quantity < 0) {
+            log.warn("Invalid quantity provided: " + quantity);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
 
         productService.reduceQuantity(productID, quantity);
         return new ResponseEntity<>(HttpStatus.OK);
