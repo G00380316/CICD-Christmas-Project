@@ -2,6 +2,7 @@ package ie.atu.product.service;
 
 import static org.springframework.beans.BeanUtils.*;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import ie.atu.product.db.ProductRepo;
@@ -28,11 +29,17 @@ public class ProductService {
                 .price(productRequest.getPrice())
                 .build();
 
-        product = productRepo.save(product);
+        try {
+            product = productRepo.save(product);
 
-        log.info("Product Created");
-        log.info("Product Id :" + product.getProductId());
-        return product.getProductId();
+            log.info("Product Created");
+            log.info("Product Id :" + product.getProductId());
+
+            return product.getProductId();
+        } catch (DataAccessException  e) {
+            log.error("Error adding product", e);
+            throw new ProductServiceException("Error Adding Product", "PRODUCT_NOT_ADDED");
+        }
     }
 
     public ProductResponse getProductbyId(long productId) {
