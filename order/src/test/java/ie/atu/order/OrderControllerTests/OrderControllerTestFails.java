@@ -15,30 +15,30 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import ie.atu.product.controller.ProductController;
-import ie.atu.product.exception.ProductServiceException;
-import ie.atu.product.payload.ProductRequest;
-import ie.atu.product.service.ProductService;
+import ie.atu.order.controller.OrderController;
+import ie.atu.order.service.OrderService;
 
-@WebMvcTest(ProductController.class)
+
+
+@WebMvcTest(OrderController.class)
 public class OrderControllerTestFails {
 
-    @Autowired
-    private MockMvc mockMvc;
+        @Autowired
+        private MockMvc mockMvc;
 
-    @MockBean
-    private ProductService productService;
+        @MockBean
+        private OrderService orderService;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+        @Autowired
+        private ObjectMapper objectMapper;
 
-    @BeforeEach
-    void setUp() {
+        @BeforeEach
+        void setUp() {
         // Perform common setup steps, if any
-    }
+        }
 
-    @Test
-    public void addProduct_shouldReturnBadRequest() throws Exception {
+        @Test
+        public void addProduct_shouldReturnBadRequest() throws Exception {
         ProductRequest productRequest = new ProductRequest(null, 100L, 50L);
         when(productService.addProduct(any(ProductRequest.class)))
                 .thenThrow(new ProductServiceException("Error Code:", "PRODUCT_NOT_ADDED"));
@@ -47,10 +47,10 @@ public class OrderControllerTestFails {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(productRequest)))
                 .andExpect(status().isBadRequest());
-    }
-    
-    @Test
-    public void addProduct_shouldReturnisNotFound() throws Exception {
+        }
+
+        @Test
+        public void addProduct_shouldReturnisNotFound() throws Exception {
         ProductRequest productRequest = new ProductRequest("Product", 100L, 50L);
         when(productService.addProduct(any(ProductRequest.class)))
                 .thenThrow(new ProductServiceException("Error Code:","PRODUCT_NOT_ADDED"));
@@ -59,34 +59,5 @@ public class OrderControllerTestFails {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(productRequest)))
                 .andExpect(status().isNotFound());
-    }
-
-    @Test
-    public void getProductById_shouldReturnNotFound() throws Exception {
-        long productId = 1L;
-        when(productService.getProductbyId(anyLong())).thenReturn(null)
-                .thenThrow(new ProductServiceException("Error Code:","PRODUCT_NOT_FOUND"));
-
-        mockMvc.perform(get("/product/{id}", productId))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
-    public void deleteProductById_shouldReturnNotFound() throws Exception {
-        long productId = 1L;
-        doThrow(new ProductServiceException("Error Code:","PRODUCT_NOT_FOUND")).when(productService).deleteProductById(anyLong());
-
-        mockMvc.perform(delete("/product/{id}", productId))
-                .andExpect(status().isNotFound());
-    }
-
-        @Test
-        public void reduceQuantity_shouldReturnBadRequest() throws Exception {
-        long productId = 1L;
-        long quantity = -5L; // Negative quantity is invalid
-
-        mockMvc.perform(put("/product/reduceQuantity/{id}", productId)
-                .param("quantity", String.valueOf(quantity)))
-                .andExpect(status().isBadRequest());
         }
 }

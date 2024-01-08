@@ -15,19 +15,17 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import ie.atu.product.controller.ProductController;
-import ie.atu.product.payload.ProductRequest;
-import ie.atu.product.payload.ProductResponse;
-import ie.atu.product.service.ProductService;
+import ie.atu.order.controller.OrderController;
+import ie.atu.order.service.OrderService;
 
-@WebMvcTest(ProductController.class)
+@WebMvcTest(OrderController.class)
 public class OrderControllerTestSuccess {
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockBean
-    private ProductService productService;
+    private OrderService orderService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -59,24 +57,5 @@ public class OrderControllerTestSuccess {
                 .andExpect(jsonPath("$.productName").value("Sample Product"))
                 .andExpect(jsonPath("$.price").value(100L))
                 .andExpect(jsonPath("$.quantity").value(50L));
-    }
-
-    @Test
-    public void deleteProductById_shouldReturnNoContent() throws Exception {
-        long productId = 1L;
-        doNothing().when(productService).deleteProductById(anyLong());
-
-        mockMvc.perform(delete("/product/{id}", productId))
-                .andExpect(status().isOk());// When Product is deleted from the DB HTTP Code is 200 not 204
-    }
-
-    @Test
-    public void reduceQuantity_shouldReturnOk() throws Exception {
-        long productId = 1L;
-        long quantity = 5L;
-
-        mockMvc.perform(put("/product/reduceQuantity/{id}", productId)
-                .param("quantity", String.valueOf(quantity)))
-                .andExpect(status().isOk());
     }
 }

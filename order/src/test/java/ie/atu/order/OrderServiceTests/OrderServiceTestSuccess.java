@@ -22,7 +22,7 @@ import ie.atu.product.payload.ProductResponse;
 import ie.atu.product.service.ProductService;
 
 @ExtendWith(MockitoExtension.class)
-public class ProductServiceTestSuccess {
+public class OrderServiceTestSuccess {
 
     @Mock
     private ProductRepo productRepo;

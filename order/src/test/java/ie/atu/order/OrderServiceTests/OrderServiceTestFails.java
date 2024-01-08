@@ -21,7 +21,7 @@ import ie.atu.product.payload.ProductRequest;
 import ie.atu.product.service.ProductService;
 
 @ExtendWith(MockitoExtension.class)
-public class ProductServiceTestFails {
+public class OrderServiceTestFails {
 
     @Mock
     private ProductRepo productRepo;
