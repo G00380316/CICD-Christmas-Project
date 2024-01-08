@@ -21,7 +21,7 @@ import ie.atu.product.payload.ProductRequest;
 import ie.atu.product.service.ProductService;
 
 @WebMvcTest(ProductController.class)
-public class ProductContollerTestFails {
+public class ProductControllerTestFails {
 
     @Autowired
     private MockMvc mockMvc;
