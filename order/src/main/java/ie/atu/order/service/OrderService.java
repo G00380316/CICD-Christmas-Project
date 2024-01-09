@@ -23,6 +23,8 @@ public class OrderService {
 
         private final OrderRepo orderRepo;
         private final RestTemplate restTemplate;
+        private final ProductService productService;
+        private final PaymentService paymentService;
 
         public long placeOrder(OrderRequest orderRequest) {
 
@@ -41,6 +43,8 @@ public class OrderService {
 
         order = orderRepo.save(order);
 
+        productService.reduceQuantity(orderRequest.getProductID(), orderRequest.getQuantity());
+
         log.info("Calling Payment Service to complete the payment");
 
         PaymentRequest paymentRequest = PaymentRequest.builder()
@@ -54,6 +58,7 @@ public class OrderService {
         try {
         log.info("Payment done Successfully. Changing the Order status to PLACED" + paymentRequest);
         orderStatus = "PLACED";
+        paymentService.doPayment(paymentRequest);
         } catch (Exception e) {
         log.error("Changing order status to PAYMENT_FAILED");
         orderStatus = "PAYMENT_FAILED";
@@ -81,6 +86,10 @@ public class OrderService {
                 ProductResponse.class
         );
         
+        if (productResponse == null) {
+                throw new OrderServiceException("Product not found for Product Id: " + order.getProductID(),
+                                "PRODUCT_NOT_FOUND", 404);
+        }
 
         log.info("Getting payment information from the payment Service");
 
@@ -88,6 +97,11 @@ public class OrderService {
                 "http://localhost:8082/payment/order/" + order.getId(),
                 PaymentResponse.class
         );
+
+        if (paymentResponse == null) {
+                throw new OrderServiceException("Payment details not found for Order Id: " + order.getId(),
+                                "PAYMENT_NOT_FOUND", 404);
+        }
 
         OrderResponse.ProductDetails productDetails = OrderResponse.ProductDetails
                 .builder()
@@ -110,8 +124,13 @@ public class OrderService {
                 .orderDate(order.getOrderDate())
                 .productDetails(productDetails)
                 .paymentDetails(paymentDetails)
-                .build();
+                        .build();
 
+        if (orderResponse == null) {
+                throw new OrderServiceException("Order not found for Order Id: " + order.getId(),
+                                "ORDER_NOT_FOUND", 404);
+        }
+        
         log.info("orderResponse : " + orderResponse.toString());
 
         return orderResponse;

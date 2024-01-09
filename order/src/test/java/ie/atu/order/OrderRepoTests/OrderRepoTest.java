@@ -1,4 +1,4 @@
-package ie.atu.product.ProductRepoTests;
+package ie.atu.order.OrderRepoTests;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -9,19 +9,18 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import ie.atu.product.db.ProductRepo;
-import ie.atu.product.exception.ProductServiceException;
-import ie.atu.product.model.Product;
-import ie.atu.product.service.*;
+import ie.atu.order.db.OrderRepo;
+import ie.atu.order.service.OrderService;
+
 
 @SpringBootTest
 public class OrderRepoTest {
 
     @Autowired
-    private ProductRepo productRepo;
+    private OrderRepo orderRepo;
 
     @Autowired
-    private ProductService productService;
+    private OrderService orderService;
 
     @Test
     public void shouldSaveAndRetrieveProduct() {

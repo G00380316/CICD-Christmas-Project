@@ -29,10 +29,19 @@ public class OrderController {
 
         log.info("orderRequest: {} being proccessed", orderRequest.toString());
 
-        long orderId = orderService.placeOrder(orderRequest);
-
-        log.info("Order processed Id: {}", orderId);
-        return new ResponseEntity<>(orderId, HttpStatus.OK);
+        if (orderRequest.getTotalAmount() != 0
+                && orderRequest.getQuantity() != 0
+                && orderRequest.getTotalAmount() >= 0 && orderRequest.getQuantity() > 0) {
+            try {
+                long orderId = orderService.placeOrder(orderRequest);
+                log.info("Order processed Id: {}", orderId);
+                return new ResponseEntity<>(orderId, HttpStatus.OK);
+            } catch (Exception e) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+        } else {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
 
     @GetMapping("/{orderId}")
@@ -40,12 +49,14 @@ public class OrderController {
 
         log.info("Getting Order Details method was called");
 
-        OrderResponse orderResponse
-                = orderService.getOrderDetails(orderId);
+        OrderResponse orderResponse = orderService.getOrderDetails(orderId);
 
-        log.info("orderResponse : " + orderResponse.toString());
-
-        return new ResponseEntity<>(orderResponse,
-                HttpStatus.OK);
+        try {
+            log.info("orderResponse : " + orderResponse.toString());
+            return new ResponseEntity<>(orderResponse, HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("Exception occurred while processing order details", e);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 }

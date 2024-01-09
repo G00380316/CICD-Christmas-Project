@@ -1,11 +1,10 @@
-package ie.atu.product.ProductControllerTests;
+package ie.atu.order.OrderControllerTests;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -16,9 +15,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ie.atu.order.controller.OrderController;
+import ie.atu.order.exception.OrderServiceException;
+import ie.atu.order.payload.order.OrderRequest;
+import ie.atu.order.payload.payment.PaymentType;
 import ie.atu.order.service.OrderService;
-
-
 
 @WebMvcTest(OrderController.class)
 public class OrderControllerTestFails {
@@ -32,32 +32,26 @@ public class OrderControllerTestFails {
         @Autowired
         private ObjectMapper objectMapper;
 
-        @BeforeEach
-        void setUp() {
-        // Perform common setup steps, if any
+        @Test
+        public void placeOrder_shouldReturnBadRequest() throws Exception {
+                OrderRequest orderRequest = new OrderRequest(1, 50L, -100L, PaymentType.PAYPAL);
+                when(orderService.placeOrder(any(OrderRequest.class))).thenReturn(1L);
+
+                mockMvc.perform(post("/order/placeorder")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(orderRequest)))
+                                .andExpect(status().isBadRequest());
         }
 
         @Test
-        public void addProduct_shouldReturnBadRequest() throws Exception {
-        ProductRequest productRequest = new ProductRequest(null, 100L, 50L);
-        when(productService.addProduct(any(ProductRequest.class)))
-                .thenThrow(new ProductServiceException("Error Code:", "PRODUCT_NOT_ADDED"));
+        public void getOrderDetails_shouldReturnisNotFound() throws Exception {
+                long orderId = 1L;
 
-        mockMvc.perform(post("/product")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(productRequest)))
-                .andExpect(status().isBadRequest());
-        }
+                when(orderService.getOrderDetails(anyLong()))
+                                .thenReturn(null)
+                                .thenThrow(new OrderServiceException("Error Code:", "ORDER_NOT_FOUND", 404));
 
-        @Test
-        public void addProduct_shouldReturnisNotFound() throws Exception {
-        ProductRequest productRequest = new ProductRequest("Product", 100L, 50L);
-        when(productService.addProduct(any(ProductRequest.class)))
-                .thenThrow(new ProductServiceException("Error Code:","PRODUCT_NOT_ADDED"));
-
-        mockMvc.perform(post("/product")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(productRequest)))
-                .andExpect(status().isNotFound());
+                mockMvc.perform(get("/order/{orderId}", orderId))
+                                .andExpect(status().isNotFound());
         }
 }
