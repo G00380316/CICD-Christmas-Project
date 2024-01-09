@@ -1,120 +1,124 @@
-package ie.atu.product.ProductServiceTests;
+package ie.atu.order.OrderServiceTests;
 
-import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.*;
-
-import java.util.Optional;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
 
-import ie.atu.product.db.ProductRepo;
-import ie.atu.product.model.Product;
-import ie.atu.product.payload.ProductRequest;
-import ie.atu.product.payload.ProductResponse;
-import ie.atu.product.service.ProductService;
+import ie.atu.order.db.OrderRepo;
+import ie.atu.order.model.Order;
+import ie.atu.order.payload.order.OrderRequest;
+import ie.atu.order.payload.order.OrderResponse;
+import ie.atu.order.payload.payment.PaymentResponse;
+import ie.atu.order.payload.payment.PaymentType;
+import ie.atu.order.payload.product.ProductResponse;
+import ie.atu.order.service.OrderService;
+import ie.atu.order.service.PaymentService;
+import ie.atu.order.service.ProductService;
+
+
 
 @ExtendWith(MockitoExtension.class)
 public class OrderServiceTestSuccess {
 
     @Mock
-    private ProductRepo productRepo;
+    private OrderRepo orderRepo;
 
-    @InjectMocks
+    @Mock
     private ProductService productService;
 
-    private Product product;
+    @Mock
+    private PaymentService paymentService;
 
-    @BeforeEach
-    public void setup() {
-        product = Product.builder()
-                .productId(1L)
-                .productName("Sample Product")
-                .price(100L)
-                .quantity(50L)
-                .build();
+    @Mock
+    private RestTemplate restTemplate;
+
+    @Mock
+    private Order order;
+
+    @InjectMocks
+    private OrderService orderService;
+
+    @Test
+    void placeOrder_shouldReturnOrderId() {
+    
+        Order order = new Order(1L, 1L, 10, Instant.now().truncatedTo(ChronoUnit.SECONDS), "SUCCESS", 100L);
+        OrderRequest orderRequest = new OrderRequest(1L, 100L, 50L, PaymentType.PAYPAL);
+        
+
+        given(orderRepo.save(any())).willReturn(order);
+
+        // Mocking the productService.reduceQuantity method
+        when(productService.reduceQuantity(anyLong(), anyLong())).thenReturn(ResponseEntity.ok().build());
+
+        when(paymentService.doPayment(any())).thenReturn(null);
+
+        // Act
+        long orderId = orderService.placeOrder(orderRequest);
+
+        // Assert
+        assertEquals(1L, orderId);
+        verify(orderRepo, times(2)).save(any());
+        verify(productService, times(1)).reduceQuantity(anyLong(), anyLong());
+        verify(paymentService, times(1)).doPayment(any());
     }
 
-    // JUnit test for Add Product method
-    @DisplayName("Add Product - New Product")
     @Test
-    public void testGivenProductRequestAddProduct() {
+    void getOrderDetails_shouldReturnOrderResponse() {
+        // Arrange
+        long orderId = 1L;
 
-        long expectedProductId = 1L;
-        // given
-        ProductRequest productRequest = new ProductRequest("Sample Product", 100L, 50L);
+        // Mocking order details
+        Order order = new Order();
+        order.setId(orderId);
+        order.setAmount(50L);
+        order.setOrderStatus("PLACED");
+        order.setOrderDate(Instant.now());
 
-        given(productRepo.save(any(Product.class))).willReturn(product);
+        when(orderRepo.findById(orderId)).thenReturn(java.util.Optional.of(order));
 
-        // when
-        long productId = productService.addProduct(productRequest);
+        // Mocking product details
+        ProductResponse productResponse = new ProductResponse();
+        productResponse.setProductName("Sample Product");
+        productResponse.setProductId(123L);
 
-        // then
-        assertEquals(expectedProductId, productId, "Returned productId should match the expected value");
-        verify(productRepo, times(1)).save(any(Product.class));
-    }
+        when(restTemplate.getForObject(
+                "http://localhost:8081/product/" + order.getProductID(),
+                ProductResponse.class))
+                .thenReturn(productResponse);
 
-    // JUnit test for getProductByID method
-    @DisplayName("Get Product by ID")
-    @Test
-    public void testGetProductById() {
-        // given
-        given(productRepo.findById(1L)).willReturn(Optional.of(product));
+        // Mocking payment details
+        PaymentResponse paymentResponse = new PaymentResponse();
+        paymentResponse.setPaymentID(456L);
+        paymentResponse.setStatus("SUCCESS");
+        paymentResponse.setPaymentDate(Instant.now());
 
-        // when
-        ProductResponse savedProduct = productService.getProductbyId(1L);
+        when(restTemplate.getForObject(
+                "http://localhost:8082/payment/order/" + order.getId(),
+                PaymentResponse.class))
+                .thenReturn(paymentResponse);
 
-        // then
-        assertThat(savedProduct).isNotNull();
-    }
+        // Act
+        OrderResponse orderResponse = orderService.getOrderDetails(orderId);
 
-    // JUnit test for deleteProductByID method
-    @DisplayName("Delete Product by ID")
-    @Test
-    public void testDeleteProductById() {
-        // given
-        long productId = 1L;
-
-        // Mocking the existsById behavior
-        when(productRepo.existsById(anyLong())).thenReturn(true);
-
-        // when
-        productService.deleteProductById(productId);
-
-        // then
-        verify(productRepo, times(1)).existsById(productId);
-        verify(productRepo, times(1)).deleteById(productId);
-    }
-
-    // JUnit test for Reducing Quantity Product method
-    @DisplayName("Reduce Quantity of Product by ID")
-    @Test
-    public void testReduceQuantity_SuccessfulReduction() {
-        // given
-        long productId = 1L;
-        long existingQuantity = 10L;
-        long quantityToReduce = 5L;
-
-        Product existingProduct = new Product();
-        existingProduct.setQuantity(existingQuantity);
-
-        // Mocking the findById behavior
-        when(productRepo.findById(anyLong())).thenReturn(Optional.of(existingProduct));
-
-        // when
-        productService.reduceQuantity(productId, quantityToReduce);
-
-        // then
-        verify(productRepo, times(1)).findById(productId);
-        verify(productRepo, times(1)).save(existingProduct);
-
-        assertEquals(existingQuantity - quantityToReduce, existingProduct.getQuantity());
+        // Assert
+        assertNotNull(orderResponse);
+        assertEquals(order.getId(), orderResponse.getOrderID());
+        assertEquals(order.getAmount(), orderResponse.getAmount());
+        assertEquals(order.getOrderStatus(), orderResponse.getOrderStatus());
+        assertEquals(order.getOrderDate(), orderResponse.getOrderDate());
+        assertEquals(productResponse.getProductName(), orderResponse.getProductDetails().getProductName());
+        assertEquals(productResponse.getProductId(), orderResponse.getProductDetails().getProductID());
+        assertEquals(paymentResponse.getPaymentID(), orderResponse.getPaymentDetails().getPaymentID());
+        assertEquals(paymentResponse.getStatus(), orderResponse.getPaymentDetails().getPaymentStatus());
+        assertEquals(paymentResponse.getPaymentDate(), orderResponse.getPaymentDetails().getPaymentDate());
     }
 }

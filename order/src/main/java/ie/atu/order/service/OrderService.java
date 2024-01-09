@@ -43,8 +43,15 @@ public class OrderService {
 
         order = orderRepo.save(order);
 
-        productService.reduceQuantity(orderRequest.getProductID(), orderRequest.getQuantity());
-
+        try {
+                productService.reduceQuantity(orderRequest.getProductID(), orderRequest.getQuantity());
+        } catch (Exception e) {
+                // If reducing quantity fails, throw an exception
+                log.error("Failed to reduce product quantity for Order Id: {}", order.getId(), e);
+                throw new OrderServiceException("Failed to reduce product quantity",
+                                "PRODUCT_REDUCE_QUANTITY_FAILED", 500);
+        }
+        
         log.info("Calling Payment Service to complete the payment");
 
         PaymentRequest paymentRequest = PaymentRequest.builder()
