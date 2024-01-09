@@ -1,82 +1,70 @@
 package ie.atu.payment.PaymentControllerTests;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import org.junit.jupiter.api.BeforeEach;
+import java.time.Instant;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import ie.atu.product.controller.ProductController;
-import ie.atu.product.payload.ProductRequest;
-import ie.atu.product.payload.ProductResponse;
-import ie.atu.product.service.ProductService;
+import ie.atu.payment.controller.PaymentController;
+import ie.atu.payment.payload.PaymentRequest;
+import ie.atu.payment.payload.PaymentResponse;
+import ie.atu.payment.payload.PaymentType;
+import ie.atu.payment.service.PaymentService;
 
-@WebMvcTest(ProductController.class)
+
+@WebMvcTest(PaymentController.class)
 public class PaymentControllerTestSuccess {
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockBean
-    private ProductService productService;
+    private PaymentService paymentService;
 
     @Autowired
     private ObjectMapper objectMapper;
 
-    @BeforeEach
-    void setUp() {
-        // Perform common setup steps, if any
-    }
-
     @Test
-    public void addProduct_shouldReturnCreated() throws Exception {
-        ProductRequest productRequest = new ProductRequest("Sample Product", 100L, 50L);
-        when(productService.addProduct(any(ProductRequest.class))).thenReturn(1L);
+    public void takePayment_shouldReturnCreated() throws Exception {
+        PaymentRequest paymentRequest = new PaymentRequest(1L, "1234", PaymentType.PAYPAL, 100L);
+        when(paymentService.proccessPayment(any(PaymentRequest.class))).thenReturn(1L);
 
-        mockMvc.perform(post("/product")
+        mockMvc.perform(post("/payment")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(productRequest)))
+                .content(objectMapper.writeValueAsString(paymentRequest)))
                 .andExpect(status().isCreated());
+
+        verify(paymentService, times(1)).proccessPayment(any(PaymentRequest.class));
     }
 
     @Test
-    public void getProductById_shouldReturnOk() throws Exception {
-        long productId = 1L;
-        ProductResponse productResponse = new ProductResponse("Sample Product", productId, 100L, 50L);
-        when(productService.getProductbyId(anyLong())).thenReturn(productResponse);
+    public void getPaymentByOrderID_shouldReturnOk() throws Exception {
+        long orderId = 1L;
+        PaymentResponse paymentResponse = new PaymentResponse(1L,"SUCCESS",PaymentType.PAYPAL, 100, Instant.now(), 2L);
+        when(paymentService.getPaymentDetailsByOrderID(anyLong())).thenReturn(paymentResponse);
 
-        mockMvc.perform(get("/product/{id}", productId))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.productName").value("Sample Product"))
-                .andExpect(jsonPath("$.price").value(100L))
-                .andExpect(jsonPath("$.quantity").value(50L));
-    }
+        MvcResult result = mockMvc.perform(get("/payment/order/{orderID}", orderId))
+            .andExpect(status().isOk())
+            .andReturn();
 
-    @Test
-    public void deleteProductById_shouldReturnNoContent() throws Exception {
-        long productId = 1L;
-        doNothing().when(productService).deleteProductById(anyLong());
+        verify(paymentService, times(1)).getPaymentDetailsByOrderID(orderId);
 
-        mockMvc.perform(delete("/product/{id}", productId))
-                .andExpect(status().isOk());// When Product is deleted from the DB HTTP Code is 200 not 204
-    }
+            String content = result.getResponse().getContentAsString();
+            PaymentResponse actualResponse = objectMapper.readValue(content, PaymentResponse.class);
 
-    @Test
-    public void reduceQuantity_shouldReturnOk() throws Exception {
-        long productId = 1L;
-        long quantity = 5L;
-
-        mockMvc.perform(put("/product/reduceQuantity/{id}", productId)
-                .param("quantity", String.valueOf(quantity)))
-                .andExpect(status().isOk());
+            assertEquals(paymentResponse, actualResponse);
     }
 }

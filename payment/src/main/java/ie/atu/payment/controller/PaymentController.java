@@ -28,8 +28,18 @@ public class PaymentController {
         log.info("Controller method Called to take Payment");
         log.info("Payment Request: " + paymentRequest.toString());
 
-        long paymentID = paymentService.proccessPayment(paymentRequest);
-        return new ResponseEntity<>(paymentID, HttpStatus.CREATED);
+        if ( paymentRequest.getOrderID() != 0
+                && paymentRequest.getAmount() >= 0) {
+            try {
+                long orderId = paymentService.proccessPayment(paymentRequest);
+                log.info("Order processed Id: {}", orderId);
+                return new ResponseEntity<>(orderId, HttpStatus.CREATED);
+            } catch (Exception e) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+        } else {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
 
     @GetMapping("/order/{orderID}")

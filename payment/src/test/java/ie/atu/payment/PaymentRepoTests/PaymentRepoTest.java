@@ -4,37 +4,44 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Optional;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import ie.atu.payment.db.PaymentRepo;
+import ie.atu.payment.model.Payment;
+import ie.atu.payment.exception.PaymentServiceException;
+
 @SpringBootTest
 public class PaymentRepoTest {
 
     @Autowired
-    private ProductRepo productRepo;
-
-    @Autowired
-    private ProductService productService;
+    private PaymentRepo paymentRepo;
 
     @Test
     public void shouldSaveAndRetrieveProduct() {
+
+        Instant timeTest = Instant.now();
+
         // Given
-        Product product = new Product();
-        product.setProductName("Test Product");
-        product.setQuantity(10L);
-        product.setPrice(20L);
+        Payment payment = new Payment(1L,2L,"PAYPAL","1234",timeTest.truncatedTo(ChronoUnit.SECONDS),"SUCCESS",100);
 
         // When
-        Product savedProduct = productRepo.save(product);
+        Payment savedPayment = paymentRepo.save(payment);
 
         // Then
-        Optional<Product> retrievedProduct = productRepo.findById(savedProduct.getProductId());
-        assertThat(retrievedProduct).isPresent();
-        assertThat(retrievedProduct.get().getProductName()).isEqualTo("Test Product");
-        assertThat(retrievedProduct.get().getQuantity()).isEqualTo(10L);
-        assertThat(retrievedProduct.get().getPrice()).isEqualTo(20L);
+        Optional<Payment> retrievedPayment = paymentRepo.findById(savedPayment.getId());
+        assertThat(retrievedPayment).isPresent();
+        assertThat(retrievedPayment.get().getId()).isEqualTo(1L);
+        assertThat(retrievedPayment.get().getOrderID()).isEqualTo(2L);
+        assertThat(retrievedPayment.get().getPaymentType()).isEqualTo("PAYPAL");
+        assertThat(retrievedPayment.get().getReferenceNumber()).isEqualTo("1234");
+        assertThat(retrievedPayment.get().getPaymentDate()).isEqualTo(payment.getPaymentDate().truncatedTo(ChronoUnit.SECONDS));
+        assertThat(retrievedPayment.get().getPaymentStatus()).isEqualTo("SUCCESS");
+        assertThat(retrievedPayment.get().getAmount()).isEqualTo(100);
     }
 
     @Test
@@ -43,42 +50,7 @@ public class PaymentRepoTest {
         long nonExistentProductId = 999L;
 
         // When/Then
-        assertThrows(ProductServiceException.class, () -> productRepo.findById(nonExistentProductId)
-                .orElseThrow(() -> new ProductServiceException("Product not found", "PRODUCT_NOT_FOUND")));
-    }
-
-    @Test
-    public void shouldReduceQuantity() {
-        // Given
-        Product product = new Product();
-        product.setProductName("Test Product");
-        product.setQuantity(10L);
-        product.setPrice(20L);
-        Product savedProduct = productRepo.save(product);
-
-        // When
-        productService.reduceQuantity(savedProduct.getProductId(), 5L);
-
-        // Then
-        Optional<Product> updatedProduct = productRepo.findById(savedProduct.getProductId());
-        assertThat(updatedProduct).isPresent();
-        assertThat(updatedProduct.get().getQuantity()).isEqualTo(5L);
-    }
-
-    @Test
-    public void shouldDeleteProduct() {
-        // Given
-        Product product = new Product();
-        product.setProductName("Test Product");
-        product.setQuantity(10L);
-        product.setPrice(20L);
-        Product savedProduct = productRepo.save(product);
-
-        // When
-        productRepo.deleteById(savedProduct.getProductId());
-
-        // Then
-        Optional<Product> deletedProduct = productRepo.findById(savedProduct.getProductId());
-        assertThat(deletedProduct).isEmpty();
+        assertThrows(PaymentServiceException.class, () -> paymentRepo.findById(nonExistentProductId)
+                .orElseThrow(() -> new PaymentServiceException("Payment not found", "PAYMENT_NOT_FOUND")));
     }
 }

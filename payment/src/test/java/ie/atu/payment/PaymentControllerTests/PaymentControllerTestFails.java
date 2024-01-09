@@ -5,7 +5,6 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -15,78 +14,44 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import ie.atu.product.controller.ProductController;
-import ie.atu.product.exception.ProductServiceException;
-import ie.atu.product.payload.ProductRequest;
-import ie.atu.product.service.ProductService;
+import ie.atu.payment.controller.PaymentController;
+import ie.atu.payment.exception.PaymentServiceException;
+import ie.atu.payment.payload.PaymentRequest;
+import ie.atu.payment.payload.PaymentType;
+import ie.atu.payment.service.PaymentService;
 
-@WebMvcTest(ProductController.class)
+@WebMvcTest(PaymentController.class)
 public class PaymentControllerTestFails {
 
-    @Autowired
-    private MockMvc mockMvc;
+        @Autowired
+        private MockMvc mockMvc;
 
-    @MockBean
-    private ProductService productService;
+        @MockBean
+        private PaymentService paymentService;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @BeforeEach
-    void setUp() {
-        // Perform common setup steps, if any
-    }
-
-    @Test
-    public void addProduct_shouldReturnBadRequest() throws Exception {
-        ProductRequest productRequest = new ProductRequest(null, 100L, 50L);
-        when(productService.addProduct(any(ProductRequest.class)))
-                .thenThrow(new ProductServiceException("Error Code:", "PRODUCT_NOT_ADDED"));
-
-        mockMvc.perform(post("/product")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(productRequest)))
-                .andExpect(status().isBadRequest());
-    }
-    
-    @Test
-    public void addProduct_shouldReturnisNotFound() throws Exception {
-        ProductRequest productRequest = new ProductRequest("Product", 100L, 50L);
-        when(productService.addProduct(any(ProductRequest.class)))
-                .thenThrow(new ProductServiceException("Error Code:","PRODUCT_NOT_ADDED"));
-
-        mockMvc.perform(post("/product")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(productRequest)))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
-    public void getProductById_shouldReturnNotFound() throws Exception {
-        long productId = 1L;
-        when(productService.getProductbyId(anyLong())).thenReturn(null)
-                .thenThrow(new ProductServiceException("Error Code:","PRODUCT_NOT_FOUND"));
-
-        mockMvc.perform(get("/product/{id}", productId))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
-    public void deleteProductById_shouldReturnNotFound() throws Exception {
-        long productId = 1L;
-        doThrow(new ProductServiceException("Error Code:","PRODUCT_NOT_FOUND")).when(productService).deleteProductById(anyLong());
-
-        mockMvc.perform(delete("/product/{id}", productId))
-                .andExpect(status().isNotFound());
-    }
+        @Autowired
+        private ObjectMapper objectMapper;
 
         @Test
-        public void reduceQuantity_shouldReturnBadRequest() throws Exception {
-        long productId = 1L;
-        long quantity = -5L; // Negative quantity is invalid
+        public void takePayment_shouldReturnBadRequest() throws Exception {
+                PaymentRequest paymentRequest = new PaymentRequest(1L, "1234", PaymentType.PAYPAL, -100L);
+                when(paymentService.proccessPayment(any(PaymentRequest.class))).thenReturn(1L);
 
-        mockMvc.perform(put("/product/reduceQuantity/{id}", productId)
-                .param("quantity", String.valueOf(quantity)))
-                .andExpect(status().isBadRequest());
+                mockMvc.perform(post("/payment")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(paymentRequest)))
+                        .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        public void getPaymentByOrderID_shouldReturnisNotFound() throws Exception {
+                long orderId = 1L;
+
+                when(paymentService.getPaymentDetailsByOrderID(anyLong()))
+                                .thenReturn(null)
+                                .thenThrow(new PaymentServiceException("Error Code:", "PAYMENT_NOT_FOUND"));
+
+                mockMvc.perform(get("/order/{orderId}", orderId))
+                                .andExpect(status().isNotFound());
         }
 }
