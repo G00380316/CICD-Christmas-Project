@@ -2,8 +2,20 @@
   "java.compile.nullAnalysis.mode": "automatic",
   "java.jdt.ls.vmargs": "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx2G -Xms100m -Xlog:disable",
   "java.debug.settings.onBuildFailureProceed": true,
-  "files.exclude": {
-    "**/order/src/test/java/ie/atu/order": false,
-    "**/order/src/test": false
-  }
+  "maven.view": "flat",
+  "sqltools.connections": [
+    {
+      "mysqlOptions": {
+        "authProtocol": "default",
+        "enableSsl": "Disabled"
+      },
+      "previewLimit": 50,
+      "server": "localhost",
+      "port": 3306,
+      "driver": "MySQL",
+      "name": "PaymentDB",
+      "username": "root",
+      "database": "paymentdb"
+    }
+  ]
 }
